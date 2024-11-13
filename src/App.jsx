@@ -8,6 +8,7 @@ import { QuizManagementPage } from "./components/pages/QuizManagementPage";
 import { ProfilePage } from "./components/pages/ProfilePage";
 import { HistoryPage } from "./components/pages/HistoryPage";
 import { LeaderboardPage } from "./components/pages/LeaderboardPage";
+import { ResetPasswordPage } from "./components/pages/ResetPasswordPage";
 
 // import { Auth0Provider } from "@auth0/auth0-react";
 // import { auth0Client } from "./config/auth0.config";
@@ -35,6 +36,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage onLogin={handleLogin} />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/reset-password" element={<ResetPasswordPage />} />
 
         <Route element={<PrivateRoute />}>
           <Route path="/quiz" element={<QuizManagementPage />} />

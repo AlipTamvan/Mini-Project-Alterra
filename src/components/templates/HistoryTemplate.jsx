@@ -65,6 +65,7 @@ export const HistoryTemplate = () => {
   };
 
   const handleQuizClick = async (id) => {
+    console.log(id);
     try {
       setDetailLoading(true);
       const detail = await quizHistoryApi.getQuizHistoryDetail(id);
@@ -118,7 +119,7 @@ export const HistoryTemplate = () => {
                   <div className="flex items-center justify-between">
                     <div
                       className="flex-1 min-w-0 cursor-pointer"
-                      onClick={() => handleQuizClick(item.quizId)}
+                      onClick={() => handleQuizClick(item.id)}
                     >
                       <p className="text-sm font-medium text-green-600 truncate hover:text-green-800">
                         {item.quizTitle}

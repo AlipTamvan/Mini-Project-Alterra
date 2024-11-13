@@ -20,15 +20,12 @@ import { quizHistoryApi } from "../../services/quizHistoryService";
 export const LandingPageTemplate = () => {
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const { isAuthenticated, logout, user } = useUserStore();
-  const [totalUsers, setTotalUsers] = useState(0);
-  const [completedQuizzes, setCompletedQuizzes] = useState(0);
 
   useEffect(() => {
     // Fetch total users
     const fetchTotalUsers = async () => {
       try {
         const response = await userApi.getTotalUsers(); // Assuming this endpoint returns the total users
-        setTotalUsers(response.data.totalUsers);
       } catch (error) {
         console.error("Failed to fetch total users:", error);
       }
@@ -53,7 +50,10 @@ export const LandingPageTemplate = () => {
             <ul className="flex space-x-4 items-center">
               {!isAuthenticated ? (
                 <li>
-                  <Link to="/login" className="hover:underline">
+                  <Link
+                    to="/login"
+                    className="hover:underline text-lg md:text-2lg border text-center border-white px-4 py-2 rounded"
+                  >
                     Login
                   </Link>
                 </li>
@@ -72,35 +72,35 @@ export const LandingPageTemplate = () => {
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                       <Link
                         to="/quiz"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
                         Quiz
                       </Link>
                       <Link
                         to="/history"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <History className="w-4 h-4 mr-2" />
                         History
                       </Link>
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <User className="w-4 h-4 mr-2" />
                         Profile
                       </Link>
                       <Link
                         to="/leaderboard"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <Trophy className="w-4 h-4 mr-2" />
                         Leaderboard
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" w-full text-left px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Logout

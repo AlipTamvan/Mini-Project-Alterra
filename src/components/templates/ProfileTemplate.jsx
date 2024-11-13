@@ -5,7 +5,10 @@ import cloudinaryService from "../../services/cloudinaryService";
 import useUserStore from "../../stores/userStore";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 import { isEqual } from "lodash";
+import { getAuth, EmailAuthProvider, linkWithCredential } from "firebase/auth"; // Import yang diperlukan
+import { firebaseAuth } from "../../config/firebase.config"; // Pas
 
 const validationSchema = Yup.object().shape({
   firstName: Yup.string()
@@ -82,11 +85,11 @@ export const ProfileTemplate = () => {
       try {
         // Create temporary preview
         const tempPreviewUrl = URL.createObjectURL(file);
-        setPreviewUrl(tempPreviewUrl);
+        setPreviewUrl(tempPreviewUrl); // Set preview URL ke gambar baru
         setIsImageChanged(true);
         setTempFile(file);
 
-        // We don't upload to Cloudinary immediately - we'll do that on form submit
+        // Set field value to indicate that an image is pending upload
         setFieldValue("avatar", "pending"); // Temporary value
       } catch (error) {
         console.error("Error handling image:", error);
@@ -100,8 +103,8 @@ export const ProfileTemplate = () => {
     if (previewUrl && previewUrl !== originalValues.avatar) {
       URL.revokeObjectURL(previewUrl);
     }
-    setPreviewUrl(originalValues.avatar);
-    setFieldValue("avatar", originalValues.avatar);
+    setPreviewUrl(originalValues.avatar); // Kembali ke gambar asli
+    setFieldValue("avatar", originalValues.avatar); // Kembalikan field value
     setFieldValue("avatarPublicId", originalValues.avatarPublicId);
     setIsImageChanged(false);
     setTempFile(null);
@@ -120,34 +123,84 @@ export const ProfileTemplate = () => {
 
       // Handle image upload if changed
       if (isImageChanged && tempFile) {
-        try {
-          const { url, publicId } = await cloudinaryService.uploadImage(
-            tempFile,
-            originalValues.avatarPublicId // This will handle deletion of old image
-          );
-          updatedValues.avatar = url;
-          updatedValues.avatarPublicId = publicId;
-        } catch (error) {
-          console.error("Error uploading image:", error);
-          alert("Failed to upload image");
-          return;
-        }
+        const { url, publicId } = await cloudinaryService.uploadImage(
+          tempFile,
+          originalValues.avatarPublicId
+        );
+        updatedValues.avatar = url;
+        updatedValues.avatarPublicId = publicId;
       }
 
       // Update user profile
       const response = await userApi.updateUser(
-        storeUser.userId,
+        storeUser.userId, // Pastikan storeUser.userId berisi ID dokumen yang benar
         updatedValues
       );
-      useUserStore.getState().setUser(response);
 
-      // Update state
+      const auth = getAuth(); // Mendapatkan instance auth
+
+      // Jika email dan password diisi, tambahkan provider email/password
+      if (values.email && values.password) {
+        try {
+          const user = auth.currentUser;
+
+          if (user) {
+            // Cek apakah provider email/password sudah terhubung
+            const isEmailProviderLinked = user.providerData.some(
+              (provider) => provider.providerId === "password"
+            );
+
+            if (!isEmailProviderLinked) {
+              // Jika provider belum terhubung, buat credential baru
+              const credential = EmailAuthProvider.credential(
+                values.email,
+                values.password
+              );
+
+              // Mengaitkan credential dengan akun pengguna yang sudah ada
+              await linkWithCredential(user, credential);
+            } else {
+              console.log("Email/password provider is already linked.");
+            }
+          } else {
+            // Jika pengguna belum ada, buat pengguna baru
+            await createUserWithEmailAndPassword(
+              firebaseAuth,
+              values.email,
+              values.password
+            );
+          }
+        } catch (error) {
+          console.error("Error adding email/password provider:", error);
+          Swal.fire({
+            icon: "error",
+            title: "Update Failed",
+            text: "Failed to add email/password provider.",
+          });
+          return;
+        }
+      }
+
+      // Update global state with new user data
+      useUserStore.getState().setUser({
+        ...storeUser,
+        ...updatedValues, // Menggabungkan data pengguna yang ada dengan yang baru
+      });
+
+      // Update local state
       setOriginalValues(updatedValues);
       setPreviewUrl(updatedValues.avatar);
       setIsImageChanged(false);
       setTempFile(null);
 
-      alert("Profile updated successfully!");
+      Swal.fire({
+        icon: "success",
+        title: "Update Successful",
+        text: "Data has been updated successfully!",
+        confirmButtonColor: "#10B981",
+        background: "#ECFDF5",
+        iconColor: "#059669",
+      });
     } catch (error) {
       console.error("Error updating profile:", error);
       alert("Failed to update profile");
@@ -156,7 +209,6 @@ export const ProfileTemplate = () => {
       setSubmitting(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-100 to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">

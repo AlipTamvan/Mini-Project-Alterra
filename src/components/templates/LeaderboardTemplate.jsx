@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { userApi } from "../../services/userService";
-import { Trophy, Leaf, TreeDeciduous, Sprout } from "lucide-react";
+import { Trophy, Leaf, TreeDeciduous, Sprout, UserCircle } from "lucide-react";
 
-const LeaderboardItem = ({ rank, name, score, avatar }) => {
+const LeaderboardItem = ({ rank, name, score, avatar, avatarPublicId }) => {
   console.log(name);
   const rankColors = {
     1: "bg-yellow-400",
@@ -23,11 +23,16 @@ const LeaderboardItem = ({ rank, name, score, avatar }) => {
       >
         {rank}
       </div>
-      <img
-        src={avatar}
-        alt={name}
-        className="w-12 h-12 rounded-full mr-4 border-2 border-green-500"
-      />
+      {avatar.length || avatarPublicId.length ? (
+        <img
+          src={avatar}
+          alt={name}
+          className="w-12 h-12 rounded-full mr-4 border-2 border-green-500"
+        />
+      ) : (
+        <UserCircle className="w-10 h-10 text-green-500 mr-4" />
+      )}
+
       <div className="flex-grow">
         <h3 className="text-lg font-semibold text-green-800">{name}</h3>
         <p className="text-sm text-green-600">Eco Score: {score}</p>
@@ -89,12 +94,6 @@ export const LeaderboardTemplate = () => {
                 These eco-champions are leading the way in environmental
                 awareness and action. Join them in making a difference!
               </p>
-              <div className="h-2 w-full bg-green-200 rounded-full">
-                <div
-                  className="h-2 bg-green-500 rounded-full"
-                  style={{ width: "70%" }}
-                ></div>
-              </div>
             </div>
 
             <div className="space-y-4">
@@ -105,6 +104,7 @@ export const LeaderboardTemplate = () => {
                   name={player.username}
                   score={player.scores}
                   avatar={player.avatar}
+                  avatarPublicId={player.avatarPublicId}
                 />
               ))}
             </div>
