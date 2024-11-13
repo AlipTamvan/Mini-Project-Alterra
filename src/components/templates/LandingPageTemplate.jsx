@@ -72,35 +72,35 @@ export const LandingPageTemplate = () => {
                     <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50">
                       <Link
                         to="/quiz"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <BookOpen className="w-4 h-4 mr-2" />
                         Quiz
                       </Link>
                       <Link
                         to="/history"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <History className="w-4 h-4 mr-2" />
                         History
                       </Link>
                       <Link
                         to="/profile"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <User className="w-4 h-4 mr-2" />
                         Profile
                       </Link>
                       <Link
                         to="/leaderboard"
-                        className="block px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <Trophy className="w-4 h-4 mr-2" />
                         Leaderboard
                       </Link>
                       <button
                         onClick={handleLogout}
-                        className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
+                        className=" w-full text-left px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                       >
                         <LogOut className="w-4 h-4 mr-2" />
                         Logout
