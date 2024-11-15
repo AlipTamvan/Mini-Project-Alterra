@@ -1,10 +1,10 @@
 import axios from "axios";
 import sha1 from "crypto-js/sha1";
 
-const CLOUDINARY_UPLOAD_PRESET = "rmlnseof";
-const CLOUDINARY_CLOUD_NAME = "dg1zyxy3f";
-const CLOUDINARY_API_KEY = "315185827846495";
-const CLOUDINARY_API_SECRET = "a5hXJ7nO2IbuJDVKcnFcU8nUv8I";
+const CLOUDINARY_UPLOAD_PRESET = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+const CLOUDINARY_CLOUD_NAME = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+const CLOUDINARY_API_KEY = import.meta.env.VITE_CLOUDINARY_API_KEY;
+const CLOUDINARY_API_SECRET = import.meta.env.VITE_CLOUDINARY_API_SECRET;
 const CLOUDINARY_UPLOAD_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`;
 const CLOUDINARY_DELETE_URL = `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/destroy`;
 

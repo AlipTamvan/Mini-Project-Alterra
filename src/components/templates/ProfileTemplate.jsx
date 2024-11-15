@@ -1,12 +1,17 @@
-import React, { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import { UserCircle, Leaf } from "lucide-react";
 import { userApi } from "../../services/userService";
 import cloudinaryService from "../../services/cloudinaryService";
 import useUserStore from "../../stores/userStore";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
+import Swal from "sweetalert2";
 import { isEqual } from "lodash";
-
+import {
+  getAuth,
+  updatePassword,
+  verifyBeforeUpdateEmail,
+} from "firebase/auth";
 const validationSchema = Yup.object().shape({
   firstName: Yup.string()
     .min(2, "First name must be at least 2 characters")
@@ -80,14 +85,11 @@ export const ProfileTemplate = () => {
     const file = e.target.files[0];
     if (file) {
       try {
-        // Create temporary preview
         const tempPreviewUrl = URL.createObjectURL(file);
         setPreviewUrl(tempPreviewUrl);
         setIsImageChanged(true);
         setTempFile(file);
-
-        // We don't upload to Cloudinary immediately - we'll do that on form submit
-        setFieldValue("avatar", "pending"); // Temporary value
+        setFieldValue("avatar", "pending");
       } catch (error) {
         console.error("Error handling image:", error);
         alert("Failed to handle image");
@@ -117,46 +119,133 @@ export const ProfileTemplate = () => {
       setLoading(true);
 
       let updatedValues = { ...values };
+      const auth = getAuth();
+      const user = auth.currentUser;
 
-      // Handle image upload if changed
-      if (isImageChanged && tempFile) {
+      // Cek perubahan
+      const isEmailChanged = values.email !== originalValues.email;
+      const isPasswordChanged = values.password !== originalValues.password;
+      const isInitialPassword = !originalValues.password && values.password;
+
+      // Handle perubahan email
+      if (isEmailChanged) {
         try {
-          const { url, publicId } = await cloudinaryService.uploadImage(
-            tempFile,
-            originalValues.avatarPublicId // This will handle deletion of old image
-          );
-          updatedValues.avatar = url;
-          updatedValues.avatarPublicId = publicId;
-        } catch (error) {
-          console.error("Error uploading image:", error);
-          alert("Failed to upload image");
+          // Update email di Firebase Auth
+          await verifyBeforeUpdateEmail(user, values.email);
+
+          // Update email di Firestore
+          await userApi.updateUser(storeUser.userId, {
+            ...updatedValues,
+            email: values.email,
+          });
+
+          // Update state global
+          useUserStore.getState().setUser({
+            ...storeUser,
+            email: values.email,
+          });
+
+          const result = await Swal.fire({
+            icon: "success",
+            title: "Email Berhasil Diubah",
+            html: `
+              <p>Email baru Anda: <strong>${values.email}</strong></p>
+              <p>Silakan:</p>
+              <ol class="text-left">
+                <li>1. Cek email baru Anda untuk verifikasi</li>
+                <li>2. Klik link verifikasi di email</li>
+                <li>3. Login kembali dengan email baru</li>
+              </ol>
+            `,
+            confirmButtonColor: "#10B981",
+            showCancelButton: false,
+            allowOutsideClick: false,
+          });
+
+          // Logout dan redirect hanya untuk perubahan email
+          await auth.signOut();
+          window.location.href = "/login";
           return;
+        } catch (error) {
+          console.error("Error saat mengubah email:", error);
+          throw new Error("Gagal mengubah email: " + error.message);
         }
       }
 
-      // Update user profile
-      const response = await userApi.updateUser(
-        storeUser.userId,
-        updatedValues
-      );
-      useUserStore.getState().setUser(response);
+      // Handle perubahan password atau password pertama kali
+      if (isPasswordChanged || isInitialPassword) {
+        try {
+          await updatePassword(user, values.password);
 
-      // Update state
-      setOriginalValues(updatedValues);
-      setPreviewUrl(updatedValues.avatar);
-      setIsImageChanged(false);
-      setTempFile(null);
+          // Update password di Firestore
+          await userApi.updateUser(storeUser.userId, {
+            ...updatedValues,
+            password: values.password,
+          });
 
-      alert("Profile updated successfully!");
+          await Swal.fire({
+            icon: "success",
+            title: isInitialPassword
+              ? "Password Berhasil Dibuat"
+              : "Password Berhasil Diubah",
+            text: "Password Anda telah berhasil diperbarui",
+            confirmButtonColor: "#10B981",
+          });
+        } catch (error) {
+          console.error("Error memperbarui password:", error);
+          throw new Error("Gagal memperbarui password: " + error.message);
+        }
+      }
+
+      // Handle perubahan gambar dan data lainnya
+      if (isImageChanged && tempFile) {
+        const { url, publicId } = await cloudinaryService.uploadImage(
+          tempFile,
+          originalValues.avatarPublicId
+        );
+        updatedValues.avatar = url;
+        updatedValues.avatarPublicId = publicId;
+      }
+
+      // Update profil di Firestore (jika ada perubahan selain email)
+      if (!isEmailChanged) {
+        await userApi.updateUser(storeUser.userId, updatedValues);
+
+        // Update state
+        const updatedUserData = {
+          ...storeUser,
+          ...updatedValues,
+        };
+        useUserStore.getState().setUser(updatedUserData);
+        setOriginalValues(updatedUserData);
+        setPreviewUrl(updatedValues.avatar);
+        setIsImageChanged(false);
+        setTempFile(null);
+
+        if (!isPasswordChanged && !isInitialPassword) {
+          await Swal.fire({
+            icon: "success",
+            title: "Berhasil Diperbarui",
+            text: "Profil Anda telah berhasil diperbarui!",
+            confirmButtonColor: "#10B981",
+            background: "#ECFDF5",
+            iconColor: "#059669",
+          });
+        }
+      }
     } catch (error) {
-      console.error("Error updating profile:", error);
-      alert("Failed to update profile");
+      console.error("Error memperbarui profil:", error);
+      await Swal.fire({
+        icon: "error",
+        title: "Gagal Memperbarui",
+        text: error.message || "Gagal memperbarui profil",
+        confirmButtonColor: "#EF4444",
+      });
     } finally {
       setLoading(false);
       setSubmitting(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-100 to-blue-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -209,7 +298,6 @@ export const ProfileTemplate = () => {
                   </button>
                 </div>
 
-                {/* Rest of the form fields remain the same */}
                 <div className="mb-4 flex space-x-4">
                   <div className="flex-1">
                     <label className="block text-sm font-medium text-gray-700">
@@ -268,24 +356,26 @@ export const ProfileTemplate = () => {
                   )}
                 </div>
 
-                <div className="mb-4">
-                  <label className="block text-sm font-medium text-gray-700">
-                    Email
-                  </label>
-                  <Field
-                    name="email"
-                    type="email"
-                    className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
-                      errors.email && touched.email
-                        ? "border-red-500"
-                        : "border-gray-300"
-                    }`}
-                  />
-                  {errors.email && touched.email && (
-                    <div className="text-red-500 text-sm mt-1">
-                      {errors.email}
-                    </div>
-                  )}
+                <div className="mb-4 flex items-center">
+                  <div className="flex-1">
+                    <label className="block text-sm font-medium text-gray-700">
+                      Email
+                    </label>
+                    <Field
+                      name="email"
+                      type="email"
+                      className={`mt-1 block w-full border rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-green-500 focus:border-green-500 ${
+                        errors.email && touched.email
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
+                    />
+                    {errors.email && touched.email && (
+                      <div className="text-red-500 text-sm mt-1">
+                        {errors.email}
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div className="mb-4">

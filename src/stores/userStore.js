@@ -10,12 +10,11 @@ const useUserStore = create(
       setUser: (userData) => set({ user: userData }),
       logout: () => {
         set({ isAuthenticated: false, user: null });
-        // Optional: clear localStorage manually if needed
         localStorage.removeItem("user-storage");
       },
     }),
     {
-      name: "user-storage", // nama untuk key di localStorage
+      name: "user-storage",
       storage: createJSONStorage(() => localStorage),
     }
   )

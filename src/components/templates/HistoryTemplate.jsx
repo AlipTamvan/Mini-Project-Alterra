@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Trash2,
   Leaf,
@@ -17,7 +17,6 @@ export const HistoryTemplate = () => {
   const [deleteConfirmation, setDeleteConfirmation] = useState(null);
   const [selectedQuiz, setSelectedQuiz] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
-
   useEffect(() => {
     if (user) {
       fetchHistory();
@@ -44,14 +43,17 @@ export const HistoryTemplate = () => {
   const confirmDelete = async () => {
     if (deleteConfirmation) {
       try {
+        // Perform the API call first
+        await quizHistoryApi.deleteQuizHistory(deleteConfirmation);
+
         // Immediately update UI by removing the item
         setHistory(
-          history.filter((item) => item.quizId !== deleteConfirmation)
+          (prevHistory) =>
+            prevHistory.filter((item) => item.id !== deleteConfirmation) // Pastikan menggunakan item.id
         );
-        setDeleteConfirmation(null);
 
-        // Then perform the API call
-        await quizHistoryApi.deleteQuizHistory(deleteConfirmation);
+        // Reset delete confirmation
+        setDeleteConfirmation(null);
       } catch (error) {
         console.error("Error deleting history:", error);
         // If the API call fails, refresh the list to ensure UI is in sync
@@ -65,6 +67,7 @@ export const HistoryTemplate = () => {
   };
 
   const handleQuizClick = async (id) => {
+    console.log(id);
     try {
       setDetailLoading(true);
       const detail = await quizHistoryApi.getQuizHistoryDetail(id);
@@ -118,7 +121,7 @@ export const HistoryTemplate = () => {
                   <div className="flex items-center justify-between">
                     <div
                       className="flex-1 min-w-0 cursor-pointer"
-                      onClick={() => handleQuizClick(item.quizId)}
+                      onClick={() => handleQuizClick(item.id)}
                     >
                       <p className="text-sm font-medium text-green-600 truncate hover:text-green-800">
                         {item.quizTitle}
@@ -136,7 +139,7 @@ export const HistoryTemplate = () => {
                     </div>
                     <div className="ml-4 flex-shrink-0">
                       <button
-                        onClick={() => handleDelete(item.quizId)}
+                        onClick={() => handleDelete(item.id)}
                         className="text-red-600 hover:text-red-900 transition duration-150 ease-in-out"
                       >
                         <Trash2 className="h-5 w-5" />

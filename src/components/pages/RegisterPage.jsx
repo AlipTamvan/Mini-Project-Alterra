@@ -51,6 +51,7 @@ export const RegisterPage = () => {
         password: values.password,
         scores: 0,
         avatar: "",
+        avatarPublicId: "",
       });
 
       Swal.fire({
@@ -86,7 +87,7 @@ export const RegisterPage = () => {
   });
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-100 to-blue-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br  from-green-100 to-blue-100  p-4 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-green-800">
           Register for EcoQuiz

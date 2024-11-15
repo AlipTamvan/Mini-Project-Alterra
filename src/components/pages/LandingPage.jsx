@@ -1,2 +1,2 @@
-import { LandingPageTemplate } from "../templates/LandingPageTemplate";
+import LandingPageTemplate from "../templates/LandingPageTemplate";
 export const LandingPage = () => <LandingPageTemplate />;
