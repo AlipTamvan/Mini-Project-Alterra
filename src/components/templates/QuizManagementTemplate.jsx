@@ -16,9 +16,10 @@ export const QuizManagementTemplate = () => {
   const [showQuiz, setShowQuiz] = useState(false);
   const [answers, setAnswers] = useState({});
   const [score, setScore] = useState(null);
-  const [quizSaved, setQuizSaved] = useState(false);
   const [isUpdatingScore, setIsUpdatingScore] = useState(false);
-  const [showSaveButton, setShowSaveButton] = useState(false); // State untuk kontrol tombol Save
+  const [showSaveButton, setShowSaveButton] = useState(false);
+  const [showNewQuizButton, setShowNewQuizButton] = useState(false);
+
   const [description, setDescription] = useState(
     "Meet Gaia, the Eco Fairy! She's here to guide you through our environmental quiz adventure. With her magical orb, she crafts unique questions to test your eco-knowledge. Are you ready to embark on a green journey of discovery?"
   );
@@ -53,36 +54,48 @@ export const QuizManagementTemplate = () => {
         setDescription(
           "Oops! Gaia's magic orb can't conjure quizzes on that topic. Try an eco-friendly question instead!"
         );
-        setHistory([
-          ...history,
-          {
-            prompt: input,
-            response:
-              "Sorry, Gaia can see it's not a question of eco-related topics.",
-          },
-        ]);
+
         setLoading(false);
         return;
       }
 
-      let prompt = `Create a unique and engaging quiz in English on the topic "${input}". 
-        Ensure that all questions are related to environmental issues, particularly focusing on aspects like water conservation, pollution, and sustainability. 
-        Incorporate the term "Quiz" within the context. 
-        Return the output in JSON format, featuring an array called "questions" that contains 10 unique and diverse questions related to "${input}". 
-        Each question must consist of "question", "options" (an array of possible answers), and "correctIndex" (the index of the correct answer). 
-        Ensure that every question presents a distinct context, and no two questions should be identical, even when the same topic is requested. 
-        Use different styles and formats to make the quiz more interesting, and include random elements or scenarios in the questions to enhance their uniqueness. 
-        Additionally, ensure that the questions are crafted in such a manner that they do not repeat across various requests for the same topic.`;
+      // let prompt = `Create a unique and engaging quiz in English on the topic "${input}".
+      //   Ensure that all questions are related to environmental issues, particularly focusing on aspects like water conservation, pollution, and sustainability.
+      //   Incorporate the term "Quiz" within the context.
+      //   Return the output in JSON format, featuring an array called "questions" that contains 10 unique and diverse questions related to "${input}".
+      //   Each question must consist of "question", "options" (an array of possible answers), and "correctIndex" (the index of the correct answer).
+      //   Ensure that every question presents a distinct context, and no two questions should be identical, even when the same topic is requested.
+      //   Use different styles and formats to make the quiz more interesting, and include random elements or scenarios in the questions to enhance their uniqueness.
+      //   Additionally, ensure that the questions are crafted in such a manner that they do not repeat across various requests for the same topic.`;
+
+      let prompt = `Create a unique, engaging, and informative quiz in English on the topic "${input}". 
+Ensure that all questions are relevant to environmental issues, with a primary focus on water conservation, pollution, sustainability, climate change, renewable energy, and biodiversity protection. 
+Each question should highlight both practical and theoretical aspects, encouraging awareness of the importance of real-world actions to protect the environment. 
+Incorporate the term "Quiz" naturally and clearly within the context. 
+
+Return the output in JSON format, containing an array named "questions" with 10 unique and diverse questions related to "${input}". 
+Each question should follow this structure:
+- "question": The question description.
+- "options": An array of four possible answers (ensure the options are relevant and diverse).
+- "correctIndex": The index of the correct answer.
+
+Ensure the following:
+1. Each question presents a different context, such as real-world scenarios, case studies, or hypothetical situations.
+2. No two questions are identical, even when the same topic is requested.
+3. The questions are crafted using various styles and formats, such as multiple-choice, interactive scenarios, or trivia.
+4. Creative and random elements are incorporated to enhance the uniqueness and appeal of each question.
+
+Add an educational dimension by including details such as statistics, scientific facts, or real-life examples related to "${input}" to enrich the learning value of the quiz. 
+Ensure the quiz is designed to encourage critical thinking and deepen participants' understanding of environmental issues.`;
 
       const result = await generateContent(prompt);
-      console.log("Raw response from AI:", result); // Log respons mentah
+      console.log("Raw response from AI:", result); // Log raw response
 
       if (result) {
         const cleanResult = cleanResponseText(result);
-        console.log("Cleaned response:", cleanResult); // Log respons yang sudah dibersihkan
+        console.log("Cleaned response:", cleanResult); // Log cleaned response
 
         try {
-          // Validasi JSON sebelum parsing
           if (isValidJSON(cleanResult)) {
             const parsedQuestions = JSON.parse(cleanResult);
             setQuestions(parsedQuestions.questions);
@@ -99,22 +112,8 @@ export const QuizManagementTemplate = () => {
           }
         } catch (parseError) {
           console.error("Error parsing quiz JSON:", parseError);
-          setHistory([
-            ...history,
-            {
-              prompt: input,
-              response: "Invalid quiz format. Please try again.",
-            },
-          ]);
         }
       } else {
-        setHistory([
-          ...history,
-          {
-            prompt: input,
-            response: "Sorry, there was an error creating the quiz.",
-          },
-        ]);
       }
     } catch (error) {
       console.error("Error generating quiz:", error);
@@ -123,7 +122,6 @@ export const QuizManagementTemplate = () => {
     setInput("");
   };
 
-  // Fungsi untuk memvalidasi JSON
   const isValidJSON = (str) => {
     try {
       JSON.parse(str);
@@ -139,7 +137,9 @@ export const QuizManagementTemplate = () => {
 
   const calculateScore = async () => {
     setIsUpdatingScore(true);
-    setShowSaveButton(false); // Sembunyikan tombol Save saat menghitung skor
+    setShowSaveButton(false);
+    setShowNewQuizButton(false);
+
     try {
       let correct = 0;
       questions.forEach((question, index) => {
@@ -156,7 +156,7 @@ export const QuizManagementTemplate = () => {
 
       // Fetch updated user data
       const updatedUser = await userApi.getUserById(user.userId);
-      useUserStore.getState().setUser(updatedUser); // Update global state
+      useUserStore.getState().setUser(updatedUser);
 
       // Show success message
       Swal.fire({
@@ -170,8 +170,9 @@ export const QuizManagementTemplate = () => {
         iconColor: "#059669",
       });
 
-      // Tampilkan tombol Save setelah skor berhasil diperbarui
+      // Show Save and New Quiz buttons after score is updated
       setShowSaveButton(true);
+      setShowNewQuizButton(true);
     } catch (error) {
       console.error("Error updating score:", error);
       Swal.fire({
@@ -192,11 +193,11 @@ export const QuizManagementTemplate = () => {
     setQuestions([]);
     setAnswers({});
     setScore(null);
-    setQuizSaved(false); // Reset quiz save status
-    setShowSaveButton(false); // Reset tombol Save
+    setShowSaveButton(false);
+    setShowNewQuizButton(false);
     setDescription(
       "Meet Gaia, the Eco Fairy! She's here to guide you through our environmental quiz adventure. With her magical orb, she crafts unique questions to test your eco-knowledge. Are you ready to embark on a green journey of discovery?"
-    ); // Reset description
+    );
   };
 
   const saveQuiz = async () => {
@@ -213,7 +214,6 @@ export const QuizManagementTemplate = () => {
     }
 
     const formattedQuestions = questions.map((question, index) => {
-      // Pastikan semua field memiliki nilai yang valid
       return {
         question: question.question || "No question provided",
         choices: question.options || [],
@@ -232,12 +232,11 @@ export const QuizManagementTemplate = () => {
       createdAt: new Date().toISOString(),
     };
 
-    console.log("Quiz Data to be saved:", quizData); // Log data to check for undefined values
+    console.log("Quiz Data to be saved:", quizData);
 
     try {
       const response = await quizHistoryApi.saveQuizHistory(quizData);
       console.log("Quiz saved successfully:", response);
-      setQuizSaved(true);
       Swal.fire({
         icon: "success",
         title: "Adding Quiz",
@@ -248,7 +247,14 @@ export const QuizManagementTemplate = () => {
       });
     } catch (error) {
       console.error("Failed to save quiz:", error);
-      alert("An error occurred while saving the quiz.");
+      Swal.fire({
+        icon: "error",
+        title: "Error",
+        text: "An error occurred while saving the quiz.",
+        confirmButtonColor: "#EF4444",
+        background: "#FEE2E2",
+        iconColor: "#DC2626",
+      });
     }
   };
 
@@ -284,7 +290,7 @@ export const QuizManagementTemplate = () => {
                   <button
                     type="submit"
                     className="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md"
-                    disabled={loading} // Disable button while loading
+                    disabled={loading}
                   >
                     <Send className="w-5 h-5 " />
                   </button>
@@ -313,7 +319,7 @@ export const QuizManagementTemplate = () => {
                           value={oIndex}
                           name={`question-${qIndex}`}
                           onChange={() => handleAnswer(qIndex, oIndex)}
-                          checked={answers[qIndex] === oIndex}
+                          checked={answers[qIndex] === oIndex} //membandingkan jawaban untuk pertanyaan tertentu dengan opsi tertentu.
                         />
                         <label>{option}</label>
                       </div>
@@ -326,7 +332,7 @@ export const QuizManagementTemplate = () => {
                 {score === null ? (
                   <button
                     onClick={calculateScore}
-                    disabled={isUpdatingScore} // Disable button while updating score
+                    disabled={isUpdatingScore}
                     className={`bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-md ${
                       isUpdatingScore ? "opacity-50 cursor-not-allowed" : ""
                     }`}
@@ -351,17 +357,15 @@ export const QuizManagementTemplate = () => {
                 )}
 
                 <div className="flex flex-col-2 md:flex-row mt-4 md:mt-0 space-x-4">
-                  {score !== null &&
-                    showSaveButton &&
-                    !quizSaved && ( // Show Save button only after score is updated
-                      <button
-                        onClick={saveQuiz}
-                        className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md md:mb-0 md:mr-2"
-                      >
-                        Save Quiz
-                      </button>
-                    )}
-                  {score !== null && (
+                  {score !== null && showSaveButton && (
+                    <button
+                      onClick={saveQuiz}
+                      className="bg-yellow-500 hover:bg-yellow-600 text-white py-2 px-4 rounded-md md:mb-0 md:mr-2"
+                    >
+                      Save Quiz
+                    </button>
+                  )}
+                  {score !== null && showNewQuizButton && (
                     <button
                       onClick={resetQuiz}
                       className="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-md"

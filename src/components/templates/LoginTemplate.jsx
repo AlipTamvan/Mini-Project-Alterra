@@ -15,6 +15,7 @@ import Footer from "../Login/Footer";
 
 const LoginTemplate = () => {
   const [loginError, setLoginError] = useState("");
+  const [isLoading, setLoading] = useState(false);
   const navigate = useNavigate();
   const { setIsAuthenticated, setUser } = useUserStore();
 
@@ -28,6 +29,7 @@ const LoginTemplate = () => {
   });
 
   const handleLogin = async (values) => {
+    setLoading(true);
     try {
       const user = await userApi.loginUser(values.email, values.password);
       const userDoc = await getDoc(doc(firestore, "users", user.id));
@@ -52,10 +54,13 @@ const LoginTemplate = () => {
       } else {
         setLoginError(error.message || "An error occurred during login.");
       }
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleGoogleLogin = async () => {
+    setLoading(true);
     const provider = new GoogleAuthProvider();
     try {
       const result = await signInWithPopup(firebaseAuth, provider);
@@ -109,6 +114,8 @@ const LoginTemplate = () => {
       setLoginError(
         error.message || "An error occurred while logging in with Google."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -127,6 +134,7 @@ const LoginTemplate = () => {
       <Form
         formik={formik}
         loginError={loginError}
+        isLoading={isLoading}
         handleGoogleLogin={handleGoogleLogin}
       />
       <Footer />

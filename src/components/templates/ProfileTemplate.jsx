@@ -93,22 +93,7 @@ export const ProfileTemplate = () => {
       } catch (error) {
         console.error("Error handling image:", error);
         alert("Failed to handle image");
-        handleCancelImageChange(setFieldValue);
       }
-    }
-  };
-
-  const handleCancelImageChange = (setFieldValue) => {
-    if (previewUrl && previewUrl !== originalValues.avatar) {
-      URL.revokeObjectURL(previewUrl);
-    }
-    setPreviewUrl(originalValues.avatar);
-    setFieldValue("avatar", originalValues.avatar);
-    setFieldValue("avatarPublicId", originalValues.avatarPublicId);
-    setIsImageChanged(false);
-    setTempFile(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
     }
   };
 
@@ -147,14 +132,14 @@ export const ProfileTemplate = () => {
 
           const result = await Swal.fire({
             icon: "success",
-            title: "Email Berhasil Diubah",
+            title: "Email Successfully Changed",
             html: `
-              <p>Email baru Anda: <strong>${values.email}</strong></p>
-              <p>Silakan:</p>
+              <p>Your new email: <strong>${values.email}</strong></p>
+              <p>Please follow the steps:</p>
               <ol class="text-left">
-                <li>1. Cek email baru Anda untuk verifikasi</li>
-                <li>2. Klik link verifikasi di email</li>
-                <li>3. Login kembali dengan email baru</li>
+                <li>1. Check your new email for verification</li>
+                <li>2. Click the verification link in the email</li>
+                <li>3. Log in again with your new email</li>
               </ol>
             `,
             confirmButtonColor: "#10B981",
@@ -167,8 +152,11 @@ export const ProfileTemplate = () => {
           window.location.href = "/login";
           return;
         } catch (error) {
-          console.error("Error saat mengubah email:", error);
-          throw new Error("Gagal mengubah email: " + error.message);
+          console.error("Error while changing email:", error);
+          throw new Error(
+            "Failed to change email: Please try logging in again. " +
+              error.message
+          );
         }
       }
 
@@ -186,14 +174,14 @@ export const ProfileTemplate = () => {
           await Swal.fire({
             icon: "success",
             title: isInitialPassword
-              ? "Password Berhasil Dibuat"
-              : "Password Berhasil Diubah",
-            text: "Password Anda telah berhasil diperbarui",
+              ? "Password Successfully Created"
+              : "Password Successfully Changed",
+            text: "Your password has been successfully updated",
             confirmButtonColor: "#10B981",
           });
         } catch (error) {
-          console.error("Error memperbarui password:", error);
-          throw new Error("Gagal memperbarui password: " + error.message);
+          console.error("Error updating password:", error);
+          throw new Error("Failed to update password: " + error.message);
         }
       }
 
@@ -216,6 +204,7 @@ export const ProfileTemplate = () => {
           ...storeUser,
           ...updatedValues,
         };
+
         useUserStore.getState().setUser(updatedUserData);
         setOriginalValues(updatedUserData);
         setPreviewUrl(updatedValues.avatar);
@@ -225,8 +214,8 @@ export const ProfileTemplate = () => {
         if (!isPasswordChanged && !isInitialPassword) {
           await Swal.fire({
             icon: "success",
-            title: "Berhasil Diperbarui",
-            text: "Profil Anda telah berhasil diperbarui!",
+            title: "Successfully Updated",
+            text: "Your profile has been successfully updated!",
             confirmButtonColor: "#10B981",
             background: "#ECFDF5",
             iconColor: "#059669",
@@ -237,8 +226,8 @@ export const ProfileTemplate = () => {
       console.error("Error memperbarui profil:", error);
       await Swal.fire({
         icon: "error",
-        title: "Gagal Memperbarui",
-        text: error.message || "Gagal memperbarui profil",
+        title: "Update Failed",
+        text: error.message || "Failed to update profile",
         confirmButtonColor: "#EF4444",
       });
     } finally {
