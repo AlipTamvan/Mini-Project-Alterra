@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import generateContent from "../../services/googleGenerativeAiService";
+// import generateContent from "../../services/googleGenerativeAiService";
+import generateContent from "../../services/openRouterAiService";
 import { quizHistoryApi } from "../../services/quizHistoryService";
 import useUserStore from "../../stores/userStore";
 import Swal from "sweetalert2";
@@ -59,34 +60,34 @@ export const QuizManagementTemplate = () => {
         return;
       }
 
-      // let prompt = `Create a unique and engaging quiz in English on the topic "${input}".
-      //   Ensure that all questions are related to environmental issues, particularly focusing on aspects like water conservation, pollution, and sustainability.
-      //   Incorporate the term "Quiz" within the context.
-      //   Return the output in JSON format, featuring an array called "questions" that contains 10 unique and diverse questions related to "${input}".
-      //   Each question must consist of "question", "options" (an array of possible answers), and "correctIndex" (the index of the correct answer).
-      //   Ensure that every question presents a distinct context, and no two questions should be identical, even when the same topic is requested.
-      //   Use different styles and formats to make the quiz more interesting, and include random elements or scenarios in the questions to enhance their uniqueness.
-      //   Additionally, ensure that the questions are crafted in such a manner that they do not repeat across various requests for the same topic.`;
+      let prompt = `Create a unique and engaging quiz in English on the topic "${input}".
+        Ensure that all questions are related to environmental issues, particularly focusing on aspects like water conservation, pollution, and sustainability.
+        Incorporate the term "Quiz" within the context.
+        Return the output in JSON format, featuring an array called "questions" that contains 10 unique and diverse questions related to "${input}".
+        Each question must consist of "question", "options" (an array of possible answers), and "correctIndex" (the index of the correct answer).
+        Ensure that every question presents a distinct context, and no two questions should be identical, even when the same topic is requested.
+        Use different styles and formats to make the quiz more interesting, and include random elements or scenarios in the questions to enhance their uniqueness.
+        Additionally, ensure that the questions are crafted in such a manner that they do not repeat across various requests for the same topic.`;
 
-      let prompt = `Create a unique, engaging, and informative quiz in English on the topic "${input}". 
-Ensure that all questions are relevant to environmental issues, with a primary focus on water conservation, pollution, sustainability, climate change, renewable energy, and biodiversity protection. 
-Each question should highlight both practical and theoretical aspects, encouraging awareness of the importance of real-world actions to protect the environment. 
-Incorporate the term "Quiz" naturally and clearly within the context. 
+      //       let prompt = `Create a unique, engaging, and informative quiz in English on the topic "${input}".
+      // Ensure that all questions are relevant to environmental issues, with a primary focus on water conservation, pollution, sustainability, climate change, renewable energy, and biodiversity protection.
+      // Each question should highlight both practical and theoretical aspects, encouraging awareness of the importance of real-world actions to protect the environment.
+      // Incorporate the term "Quiz" naturally and clearly within the context.
 
-Return the output in JSON format, containing an array named "questions" with 10 unique and diverse questions related to "${input}". 
-Each question should follow this structure:
-- "question": The question description.
-- "options": An array of four possible answers (ensure the options are relevant and diverse).
-- "correctIndex": The index of the correct answer.
+      // Return the output in JSON format, containing an array named "questions" with 10 unique and diverse questions related to "${input}".
+      // Each question should follow this structure:
+      // - "question": The question description.
+      // - "options": An array of four possible answers (ensure the options are relevant and diverse).
+      // - "correctIndex": The index of the correct answer.
 
-Ensure the following:
-1. Each question presents a different context, such as real-world scenarios, case studies, or hypothetical situations.
-2. No two questions are identical, even when the same topic is requested.
-3. The questions are crafted using various styles and formats, such as multiple-choice, interactive scenarios, or trivia.
-4. Creative and random elements are incorporated to enhance the uniqueness and appeal of each question.
+      // Ensure the following:
+      // 1. Each question presents a different context, such as real-world scenarios, case studies, or hypothetical situations.
+      // 2. No two questions are identical, even when the same topic is requested.
+      // 3. The questions are crafted using various styles and formats, such as multiple-choice, interactive scenarios, or trivia.
+      // 4. Creative and random elements are incorporated to enhance the uniqueness and appeal of each question.
 
-Add an educational dimension by including details such as statistics, scientific facts, or real-life examples related to "${input}" to enrich the learning value of the quiz. 
-Ensure the quiz is designed to encourage critical thinking and deepen participants' understanding of environmental issues.`;
+      // Add an educational dimension by including details such as statistics, scientific facts, or real-life examples related to "${input}" to enrich the learning value of the quiz.
+      // Ensure the quiz is designed to encourage critical thinking and deepen participants' understanding of environmental issues.`;
 
       const result = await generateContent(prompt);
       console.log("Raw response from AI:", result); // Log raw response

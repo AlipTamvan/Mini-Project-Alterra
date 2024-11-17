@@ -130,19 +130,24 @@ export const ProfileTemplate = () => {
             email: values.email,
           });
 
-          const result = await Swal.fire({
+          await Swal.fire({
             icon: "success",
             title: "Email Successfully Changed",
             html: `
-              <p>Your new email: <strong>${values.email}</strong></p>
-              <p>Please follow the steps:</p>
-              <ol class="text-left">
-                <li>1. Check your new email for verification</li>
-                <li>2. Click the verification link in the email</li>
-                <li>3. Log in again with your new email</li>
-              </ol>
+              <div style="text-align: left; font-family: Arial, sans-serif; color: #333;">
+                <p style="font-size: 1rem; margin-bottom: 1rem;">
+                  Your new email: <strong style="color: #10B981;">${values.email}</strong>
+                </p>
+                <p style="font-size: 1rem; margin-bottom: 0.5rem;">Please follow the steps below:</p>
+                <ol style="padding-left: 1.5rem; font-size: 0.9rem; line-height: 1.6;">
+                  <li>1. Check your new email for verification.</li>
+                  <li>2. Click the verification link in the email.</li>
+                  <li>3. Log in again using your new email.</li>
+                </ol>
+              </div>
             `,
             confirmButtonColor: "#10B981",
+            confirmButtonText: "Got it",
             showCancelButton: false,
             allowOutsideClick: false,
           });
@@ -173,11 +178,11 @@ export const ProfileTemplate = () => {
 
           await Swal.fire({
             icon: "success",
-            title: isInitialPassword
-              ? "Password Successfully Created"
-              : "Password Successfully Changed",
-            text: "Your password has been successfully updated",
+            title: "Successfully Updated",
+            text: "Your profile has been successfully updated!",
             confirmButtonColor: "#10B981",
+            background: "#ECFDF5",
+            iconColor: "#059669",
           });
         } catch (error) {
           console.error("Error updating password:", error);

@@ -59,7 +59,7 @@ const Header = () => {
                       to="profile"
                       className=" px-4 py-2 text-gray-700 hover:bg-green-50 flex items-center"
                     >
-                      <History className="w-4 h-4 mr-2" />
+                      <User className="w-4 h-4 mr-2" />
                       Profile
                     </Link>
                     <Link
