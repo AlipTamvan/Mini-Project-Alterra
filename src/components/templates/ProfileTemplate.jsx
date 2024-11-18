@@ -115,6 +115,28 @@ export const ProfileTemplate = () => {
       // Handle perubahan email
       if (isEmailChanged) {
         try {
+          // Cek apakah email sudah terdaftar
+          const isRegistered = await userApi.isEmailRegistered(values.email);
+          if (isRegistered) {
+            // Jika email sudah terdaftar, tampilkan pesan error
+            await Swal.fire({
+              icon: "error",
+              title: "Email Already Registered",
+              html: `
+          <div style="text-align: left; font-family: Arial, sans-serif; color: #333;">
+            <p style="font-size: 1rem; margin-bottom: 1rem;">
+              The email <strong style="color: #10B981;">${values.email}</strong> is already registered. Please use a different email.
+            </p>
+          </div>
+        `,
+              confirmButtonColor: "#10B981",
+              confirmButtonText: "Got it",
+              showCancelButton: false,
+              allowOutsideClick: false,
+            });
+            return; // Hentikan proses jika email sudah terdaftar
+          }
+
           // Update email di Firebase Auth
           await verifyBeforeUpdateEmail(user, values.email);
 
@@ -168,22 +190,8 @@ export const ProfileTemplate = () => {
       // Handle perubahan password atau password pertama kali
       if (isPasswordChanged || isInitialPassword) {
         try {
+          // Update password di Firebase Auth
           await updatePassword(user, values.password);
-
-          // Update password di Firestore
-          await userApi.updateUser(storeUser.userId, {
-            ...updatedValues,
-            password: values.password,
-          });
-
-          await Swal.fire({
-            icon: "success",
-            title: "Successfully Updated",
-            text: "Your profile has been successfully updated!",
-            confirmButtonColor: "#10B981",
-            background: "#ECFDF5",
-            iconColor: "#059669",
-          });
         } catch (error) {
           console.error("Error updating password:", error);
           throw new Error("Failed to update password: " + error.message);
@@ -216,24 +224,24 @@ export const ProfileTemplate = () => {
         setIsImageChanged(false);
         setTempFile(null);
 
-        if (!isPasswordChanged && !isInitialPassword) {
-          await Swal.fire({
-            icon: "success",
-            title: "Successfully Updated",
-            text: "Your profile has been successfully updated!",
-            confirmButtonColor: "#10B981",
-            background: "#ECFDF5",
-            iconColor: "#059669",
-          });
-        }
+        await Swal.fire({
+          icon: "success",
+          title: "Successfully Updated",
+          text: "Your profile has been successfully updated!",
+          confirmButtonColor: "#10B981",
+          background: "#ECFDF5",
+          iconColor: "#059669",
+        });
       }
     } catch (error) {
       console.error("Error memperbarui profil:", error);
       await Swal.fire({
         icon: "error",
         title: "Update Failed",
-        text: error.message || "Failed to update profile",
+        text: "Please log in again",
         confirmButtonColor: "#EF4444",
+      }).then(() => {
+        window.location.href = "/login";
       });
     } finally {
       setLoading(false);

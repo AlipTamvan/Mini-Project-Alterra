@@ -1,6 +1,9 @@
 import React, { useState } from "react";
-// import generateContent from "../../services/googleGenerativeAiService";
-import generateContent from "../../services/openRouterAiService";
+
+import generateContent from "../../services/googleGenerativeAiService";
+
+// import generateContent from "../../services/openRouterAiService";
+
 import { quizHistoryApi } from "../../services/quizHistoryService";
 import useUserStore from "../../stores/userStore";
 import Swal from "sweetalert2";
@@ -8,6 +11,7 @@ import { getAuth } from "firebase/auth";
 import { userApi } from "../../services/userService";
 import { Send } from "lucide-react";
 import fairy from "../../assets/img/fairy-holding-magic-ball.png";
+import openRouterService from "../../services/openRouterAiService";
 
 export const QuizManagementTemplate = () => {
   const [input, setInput] = useState("");
@@ -44,7 +48,12 @@ export const QuizManagementTemplate = () => {
 
     const checkEcoRelevance = async (input) => {
       const relevancePrompt = `Is the following input related to environmental issues? "${input}" Please respond with "yes" or "no".`;
+
+      // Without Intance
       const result = await generateContent(relevancePrompt);
+
+      // const result = await openRouterService.generateContent(relevancePrompt);
+
       return result && result.toLowerCase().includes("yes");
     };
 
@@ -89,7 +98,14 @@ export const QuizManagementTemplate = () => {
       // Add an educational dimension by including details such as statistics, scientific facts, or real-life examples related to "${input}" to enrich the learning value of the quiz.
       // Ensure the quiz is designed to encourage critical thinking and deepen participants' understanding of environmental issues.`;
 
+      // Without Intance
       const result = await generateContent(prompt);
+
+      // const result = await openRouterService.generateContent(prompt, {
+      //   temperature: 0.8, // Slightly higher temperature for more creative questions
+      //   maxTokens: 2048, // Increased token limit for longer quizzes
+      // });
+
       console.log("Raw response from AI:", result); // Log raw response
 
       if (result) {

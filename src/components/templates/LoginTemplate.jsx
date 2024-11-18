@@ -76,8 +76,8 @@ const LoginTemplate = () => {
           doc(firestore, "users", user.uid),
           {
             email: user.email, // Sync the email from Firebase Auth
-            firstName: "",
-            lastName: "",
+            firstName: userDoc.exists() ? userDoc.data().firstName : "",
+            lastName: userDoc.exists() ? userDoc.data().lastName : "",
             username: userDoc.exists()
               ? userDoc.data().username // Keep existing username if it exists
               : "Guest" + Math.floor(1000 + Math.random() * 9000),
